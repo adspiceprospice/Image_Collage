@@ -89,37 +89,119 @@ def make_collage(
     image_paths: List[Path],
     output_path: Path,
     canvas_w: int = 3840,
-    canvas_h: int = 2160,
+    target_h: int = 2160,
     bg_color=(0, 0, 0),
 ) -> None:
-
+    """
+    Create a collage where the width is fixed but height is dynamic.
+    Preserves aspect ratios and minimizes empty space.
+    """
     if len(image_paths) < 2:
         raise ValueError("Need at least 2 images to make a collage.")
 
     n = len(image_paths)
-    rows, cols = compute_grid(n, canvas_w, canvas_h)
 
-    cell_w = canvas_w // cols
-    cell_h = canvas_h // rows
+    # 1. Get image sizes and aspect ratios first
+    img_specs = []
+    for p in image_paths:
+        try:
+            with Image.open(p) as img:
+                w, h = img.size
+                img_specs.append({
+                    "path": p,
+                    "w": w,
+                    "h": h,
+                    "ratio": w / h
+                })
+        except Exception as e:
+            print(f"Warning: Could not read {p}: {e}")
 
-    collage = Image.new("RGB", (canvas_w, canvas_h), bg_color)
+    if not img_specs:
+        raise ValueError("No valid images found to process.")
 
-    for idx, path in enumerate(image_paths):
-        img = Image.open(path).convert("RGB")
-        tile = resize_to_fit_no_crop(img, cell_w, cell_h)
+    n = len(img_specs)
 
-        # center the tile in its cell
-        row = idx // cols
-        col = idx % cols
+    # 2. Decide rows/cols based on target_h as a hint
+    rows, cols = compute_grid(n, canvas_w, target_h)
 
-        tile_w, tile_h = tile.size
-        x = col * cell_w + (cell_w - tile_w) // 2
-        y = row * cell_h + (cell_h - tile_h) // 2
+    # 3. Calculate row layouts
+    row_data = []
+    total_canvas_h = 0.0
 
-        collage.paste(tile, (x, y))
+    for r in range(rows):
+        start = r * cols
+        end = min(start + cols, n)
+        row_specs = img_specs[start:end]
+        if not row_specs:
+            continue
+
+        sum_ratios = sum(s["ratio"] for s in row_specs)
+
+        # Calculate row height if it were to fill the entire canvas_w
+        row_h_to_fill = canvas_w / sum_ratios
+
+        # For an incomplete last row (if n is not a multiple of cols),
+        # stretching to fill the width might make images look huge.
+        # We cap it to the average height of previous rows for better aesthetics.
+        is_last_incomplete = (r == rows - 1 and len(row_specs) < cols and r > 0)
+
+        if is_last_incomplete:
+            avg_h = total_canvas_h / r
+            # Use avg height if the stretched height would be too dramatic
+            row_h = min(row_h_to_fill, avg_h)
+            should_fill = (row_h == row_h_to_fill)
+        else:
+            row_h = row_h_to_fill
+            should_fill = True
+
+        row_data.append({
+            "specs": row_specs,
+            "row_h": row_h,
+            "should_fill": should_fill
+        })
+        total_canvas_h += row_h
+
+    # 4. Create canvas and paste images
+    collage = Image.new("RGB", (canvas_w, int(total_canvas_h)), bg_color)
+    current_y = 0.0
+
+    for row in row_data:
+        specs = row["specs"]
+        row_h = row["row_h"]
+        row_h_int = int(row_h)
+        if row_h_int <= 0:
+            continue
+
+        if row["should_fill"]:
+            current_x = 0
+            for i, s in enumerate(specs):
+                # Target width for this image
+                tw = int(row_h * s["ratio"])
+                # Last image fills the remaining pixels in the row
+                if i == len(specs) - 1:
+                    tw = canvas_w - current_x
+
+                if tw > 0:
+                    with Image.open(s["path"]) as img:
+                        tile = img.convert("RGB").resize((tw, row_h_int), Image.Resampling.LANCZOS)
+                        collage.paste(tile, (current_x, int(current_y)))
+                    current_x += tw
+        else:
+            # Centered partial row
+            total_row_w = sum(int(row_h * s["ratio"]) for s in specs)
+            current_x = (canvas_w - total_row_w) // 2
+            for s in specs:
+                tw = int(row_h * s["ratio"])
+                if tw > 0:
+                    with Image.open(s["path"]) as img:
+                        tile = img.convert("RGB").resize((tw, row_h_int), Image.Resampling.LANCZOS)
+                        collage.paste(tile, (current_x, int(current_y)))
+                    current_x += tw
+
+        current_y += row_h
 
     collage.save(output_path, quality=95)
-    print(f"Saved collage with {n} images → {output_path}")
+    print(f"Saved collage with {n} images ({canvas_w}x{int(total_canvas_h)}) → {output_path}")
 
 
 def main():
@@ -137,8 +219,8 @@ def main():
         default="collage_4k.jpg",
         help="Output image file"
     )
-    parser.add_argument("--width", type=int, default=3840)
-    parser.add_argument("--height", type=int, default=2160)
+    parser.add_argument("--width", type=int, default=3840, help="Fixed width of output collage")
+    parser.add_argument("--height", type=int, default=2160, help="Target height for grid calculation (results in dynamic output height)")
 
     args = parser.parse_args()
 
@@ -151,7 +233,7 @@ def main():
         image_paths=image_paths,
         output_path=Path(args.output),
         canvas_w=args.width,
-        canvas_h=args.height
+        target_h=args.height
     )
 
 
