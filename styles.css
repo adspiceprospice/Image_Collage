@@ -146,7 +146,7 @@ h1 {
   text-wrap: balance;
 }
 
-.intro > p:last-child {
+.intro-copy {
   max-width: 34rem;
   margin-bottom: 0;
   color: var(--muted);

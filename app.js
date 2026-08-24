@@ -24,11 +24,11 @@
     template: document.querySelector('#photo-card-template'),
   };
 
-  const sizeOptions = Object.entries(PHOTO_SIZES)
+  const photoSizeOptionsMarkup = Object.entries(PHOTO_SIZES)
     .map(([id, size]) => `<option value="${id}">${size.label}</option>`)
     .join('');
 
-  elements.batchSize.innerHTML = sizeOptions;
+  elements.batchSize.innerHTML = photoSizeOptionsMarkup;
   elements.batchSize.value = '10x15';
 
   function showError(message) {
@@ -122,9 +122,9 @@
       const card = fragment.querySelector('.photo-card');
       const thumbnail = fragment.querySelector('.photo-thumb');
       const name = fragment.querySelector('.photo-name');
-      const size = fragment.querySelector('.photo-size');
-      const rotate = fragment.querySelector('.rotate-photo');
-      const remove = fragment.querySelector('.remove-photo');
+      const sizeSelect = fragment.querySelector('.photo-size');
+      const rotateButton = fragment.querySelector('.rotate-photo');
+      const removeButton = fragment.querySelector('.remove-photo');
       const qualityLabel = fragment.querySelector('.quality');
       const dimensions = getOrientedDimensions(photo.sizeId, photo.orientation);
       const quality = getPrintQuality(
@@ -139,10 +139,11 @@
       thumbnail.alt = `Preview of ${photo.name}`;
       name.textContent = photo.name;
       name.title = photo.name;
-      size.innerHTML = sizeOptions;
-      size.value = photo.sizeId;
-      rotate.textContent = photo.orientation === 'portrait' ? 'Turn landscape' : 'Turn portrait';
-      remove.setAttribute('aria-label', `Remove ${photo.name}`);
+      sizeSelect.innerHTML = photoSizeOptionsMarkup;
+      sizeSelect.value = photo.sizeId;
+      rotateButton.textContent =
+        photo.orientation === 'portrait' ? 'Turn landscape' : 'Turn portrait';
+      removeButton.setAttribute('aria-label', `Remove ${photo.name}`);
       qualityLabel.textContent = `${quality.dpi} dpi`;
       qualityLabel.classList.toggle('quality-low', quality.level === 'low');
       qualityLabel.title =

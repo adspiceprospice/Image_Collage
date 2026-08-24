@@ -18,10 +18,10 @@ def load_images_from_path(path: Path) -> List[Path]:
             p for p in path.iterdir()
             if p.suffix.lower() in VALID_EXTENSIONS
         )
-    elif path.is_file():
+    if path.is_file():
         return [path]
-    else:
-        return []
+
+    return []
 
 
 def load_images_auto(user_inputs: List[str]) -> List[Path]:
@@ -99,8 +99,6 @@ def make_collage(
     if len(image_paths) < 2:
         raise ValueError("Need at least 2 images to make a collage.")
 
-    n = len(image_paths)
-
     # 1. Get image sizes and aspect ratios first
     img_specs = []
     for p in image_paths:
@@ -113,8 +111,8 @@ def make_collage(
                     "h": h,
                     "ratio": w / h
                 })
-        except Exception as e:
-            print(f"Warning: Could not read {p}: {e}")
+        except Exception as exc:
+            print(f"Warning: Could not read {p}: {exc}")
 
     if not img_specs:
         raise ValueError("No valid images found to process.")
@@ -149,7 +147,7 @@ def make_collage(
             avg_h = total_canvas_h / r
             # Use avg height if the stretched height would be too dramatic
             row_h = min(row_h_to_fill, avg_h)
-            should_fill = (row_h == row_h_to_fill)
+            should_fill = row_h == row_h_to_fill
         else:
             row_h = row_h_to_fill
             should_fill = True
@@ -220,7 +218,12 @@ def main():
         help="Output image file"
     )
     parser.add_argument("--width", type=int, default=3840, help="Fixed width of output collage")
-    parser.add_argument("--height", type=int, default=2160, help="Target height for grid calculation (results in dynamic output height)")
+    parser.add_argument(
+        "--height",
+        type=int,
+        default=2160,
+        help="Target height for grid calculation (results in dynamic output height)",
+    )
 
     args = parser.parse_args()
 
@@ -233,7 +236,7 @@ def main():
         image_paths=image_paths,
         output_path=Path(args.output),
         canvas_w=args.width,
-        target_h=args.height
+        target_h=args.height,
     )
 
 
