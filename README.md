@@ -1,114 +1,48 @@
-# Image Collage Maker (4K, No Cropping, Auto Layout)
+# Paperframe
 
-A lightweight Python tool that takes **2–10+ images** and automatically generates a clean **4K collage** while:
+Paperframe arranges multiple photos on real-size A4 sheets for home printing. It runs entirely in the browser: photos stay on your device and no installation or upload is required.
 
-- ✅ Preserving the original aspect ratio  
-- ✅ **Never cropping**  
-- ✅ Never distorting  
-- ✅ Automatically choosing the best grid layout  
-- ✅ Centering each image in its cell  
-- ✅ Auto-loading all images from `./images/` when no input is provided  
+## Use it now
 
-Perfect for preparing grouped visual inputs for LLMs, summarizing video frames, building moodboards, or combining UI screenshots.
+1. Open `index.html` in a modern browser.
+2. Choose or drag in any number of images.
+3. Pick a standard print size for each photo, or use **Apply to all**.
+4. Turn individual photo frames between portrait and landscape when needed.
+5. Select **Print A4 sheets**.
+6. In the browser print dialog, use:
+   - A4 paper
+   - Portrait orientation
+   - 100% or **Actual size** scale
+   - No margins
 
----
+The light grey outlines mark the selected photo dimensions for trimming. Images are fitted inside those dimensions without cropping or distortion, so a photo with a different aspect ratio may have white space.
 
-## Features
+## Included print sizes
 
-- 🖼 **No cropping** — all images remain intact  
-- 🎯 Aspect-ratio–preserving resize  
-- 🧠 Smart grid calculation based on number of images + aspect ratio  
-- 📁 Automatic folder detection  
-- 📥 Supports: `jpg`, `jpeg`, `png`, `webp`, `bmp`, `tiff`  
-- 📤 Outputs a single high-resolution collage (default: 3840×2160)
+- Passport — 3.5 × 4.5 cm
+- 9 × 13 cm
+- Square — 10 × 10 cm
+- 10 × 15 cm
+- A6 — 10.5 × 14.8 cm
+- 13 × 18 cm
+- 5 × 7 in — 12.7 × 17.8 cm
 
----
+Paperframe uses a 5 mm A4 safe margin and 3 mm spacing between photos. If the chosen sizes do not fit on one sheet, it creates additional sheets automatically. The DPI indicator warns when an image is below the recommended 300 dpi at its chosen print size.
 
-## Installation
+## Development and verification
 
-```bash
-git clone https://github.com/<your-repo>/collage-maker.git
-cd collage-maker
-pip install pillow
-
-
-## Usage
-
-### 1. Default: Auto-load images from `./images/`
-Runs naturally if you just want to drop images into a folder.
+No packages are required. If you prefer to serve the files instead of opening `index.html` directly:
 
 ```bash
-python collage4k.py
+python3 -m http.server 8000
 ```
 
-The script will:
-- Look for an `images` folder in the project root
-- Load all valid images
-- Save a 4K collage as `collage_4k.jpg`
+Then open `http://localhost:8000`.
 
-### 2. Use specific images
-You can pass file paths directly.
+Run the layout tests with Node.js:
 
 ```bash
-python collage4k.py img1.jpg img2.jpg img3.png
+node --test tests/*.test.js
 ```
 
-### 3. Use a folder of images
-Point to any directory containing images.
-
-```bash
-python collage4k.py screenshots/
-```
-
-### 4. Custom output filename
-Specify where to save the result.
-
-```bash
-python collage4k.py images/ -o ui_collage.jpg
-```
-
-### 5. Custom canvas resolution
-Change the default 4K (3840×2160) canvas size.
-
-```bash
-python collage4k.py images/ --width 2048 --height 2048
-```
-
-## How It Works
-
-1. **Auto-Detection**: The script detects how many images are provided.
-2. **Smart Grid**: It dynamically calculates an optimal grid layout (rows × cols) that:
-   - Minimizes empty cells
-   - Matches the target aspect ratio (default 16:9)
-3. **Image Processing**:
-   - Each image is scaled to **fit** inside its cell
-   - Images are **never cropped** and **never distorted**
-   - Images are centered within the cell (black background by default)
-4. **Export**: The final result is saved as a high-resolution image.
-
----
-
-## Why This Tool Exists
-
-If you're sending images to LLMs (ChatGPT, Claude, Gemini), combining them into a single 4K collage has major advantages:
-
-- 🚀 **Faster uploads** (1 file vs 10)
-- 💰 **Lower token cost** for multimodal models
-- 🧠 **More coherent context** for the model
-- 🔗 **Easier referencing** ("top-left image", "bottom-right", etc.)
-
-### Ideal for:
-- 📱 UI/UX reviews & history
-- 📹 Multi-frame video analysis
-- 📝 Process documentation
-- 📸 Screenshot summaries
-- 🆚 Product comparison layouts
-
-## Supported File Formats
-- `.jpg`, `.jpeg`
-- `.png`
-- `.webp`
-- `.bmp`
-- `.tiff`
-
-Made with ❤️ by [Adrian](https://github.com/adspiceprospice) and [ChatGPT 5.2](https://chat.openai.com/)
+The earlier `collage4k.py` command-line tool is still included for generating free-form screen collages. It is separate from the A4 printing app and requires Pillow.

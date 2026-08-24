@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Arrange photos at standard print sizes on A4 sheets, directly in your browser."
+    />
+    <meta name="theme-color" content="#f3eee4" />
+    <title>Paperframe — A4 photo layout</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="layout.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to workspace</a>
+
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Paperframe home">
+        <svg aria-hidden="true" viewBox="0 0 32 32" width="30" height="30">
+          <path d="M6 3.5h16.5L27 8v20.5H6z" fill="currentColor" />
+          <path d="M22.5 3.5V8H27" fill="none" stroke="#f3eee4" stroke-width="1.5" />
+          <rect x="10" y="12" width="13" height="9" rx="1" fill="#f3eee4" />
+        </svg>
+        <span>Paperframe</span>
+      </a>
+      <div class="topbar-note">A4 photo layout · private and local</div>
+    </header>
+
+    <main id="workspace" class="workspace">
+      <aside class="controls" aria-label="Photo controls">
+        <section class="intro">
+          <p class="eyebrow">Print sheet builder</p>
+          <h1>Fit more photos on one page.</h1>
+          <p>
+            Add your images, choose their real print size, then print the automatically arranged A4 sheets.
+          </p>
+          <p class="privacy-note">Nothing is uploaded. Photos are fitted without cropping.</p>
+        </section>
+
+        <section
+          id="drop-zone"
+          class="drop-zone"
+          aria-labelledby="upload-title"
+        >
+          <input id="file-input" type="file" accept="image/*" multiple />
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="28" height="28">
+            <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14.5v4A1.5 1.5 0 006.5 20h11a1.5 1.5 0 001.5-1.5v-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div>
+            <strong id="upload-title">Drop photos here</strong>
+            <span>or choose files from your device</span>
+          </div>
+          <label class="button button-secondary" for="file-input">Choose photos</label>
+        </section>
+
+        <p id="error-message" class="error-message" role="alert" hidden></p>
+
+        <section id="batch-tools" class="batch-tools" hidden aria-labelledby="batch-title">
+          <div>
+            <label id="batch-title" for="batch-size">Set every photo to</label>
+            <select id="batch-size"></select>
+          </div>
+          <button id="apply-all" class="text-button" type="button">Apply to all</button>
+        </section>
+
+        <section class="photo-list-section" aria-labelledby="photos-title">
+          <div class="section-heading">
+            <h2 id="photos-title">Photos</h2>
+            <span id="photo-count">0</span>
+          </div>
+          <div id="photo-list" class="photo-list">
+            <div class="list-empty">Added photos and their sizes will appear here.</div>
+          </div>
+        </section>
+
+        <section class="print-help" aria-labelledby="print-help-title">
+          <h2 id="print-help-title">Before you print</h2>
+          <ol>
+            <li>Use A4 paper and portrait orientation.</li>
+            <li>Set scale to 100% or “Actual size”.</li>
+            <li>Choose no margins in the print dialog.</li>
+            <li>Cut along the light grey photo outlines.</li>
+          </ol>
+        </section>
+      </aside>
+
+      <section class="preview-area" aria-labelledby="preview-title">
+        <div class="preview-toolbar">
+          <div>
+            <p class="eyebrow">Live preview</p>
+            <h2 id="preview-title">A4 sheets</h2>
+          </div>
+          <div class="preview-actions">
+            <span id="sheet-summary">No sheets yet</span>
+            <button id="print-button" class="button button-primary" type="button" disabled>
+              Print A4 sheets
+            </button>
+          </div>
+        </div>
+
+        <div id="preview" class="preview" aria-live="polite">
+          <div class="preview-empty">
+            <div class="empty-sheet" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <h3>Your print sheets will appear here</h3>
+            <p>Add two or more photos, or start with one and add the rest later.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <template id="photo-card-template">
+      <article class="photo-card">
+        <img class="photo-thumb" alt="" />
+        <div class="photo-details">
+          <div class="photo-name-row">
+            <h3 class="photo-name"></h3>
+            <button class="icon-button remove-photo" type="button" aria-label="Remove photo">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
+                <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+          <label>
+            Print size
+            <select class="photo-size"></select>
+          </label>
+          <div class="photo-meta-row">
+            <button class="text-button rotate-photo" type="button">Turn landscape</button>
+            <span class="quality"></span>
+          </div>
+        </div>
+      </article>
+    </template>
+  </body>
+</html>
