@@ -21,3 +21,12 @@ test('direct-file use does not depend on secure-context UUID APIs', () => {
 
   assert.doesNotMatch(app, /crypto\.randomUUID/);
 });
+
+test('the skip link is excluded from printed photo sheets', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'styles.css'), 'utf8');
+  const printStyles = css.slice(css.indexOf('@media print'));
+  const hiddenPrintRule = printStyles.match(/([^{}]+)\{\s*display:\s*none\s*!important;/);
+
+  assert.ok(hiddenPrintRule, 'expected a print-only hidden-elements rule');
+  assert.match(hiddenPrintRule[1], /\.skip-link/);
+});

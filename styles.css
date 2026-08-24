@@ -643,6 +643,7 @@ select {
     background: white;
   }
 
+  .skip-link,
   .topbar,
   .controls,
   .preview-toolbar,
